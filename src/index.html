@@ -12,6 +12,30 @@
     <div class="bubble"></div>
     <div class="bubble"></div>
     <div class="bubble"></div>
+    <!--<svg id="svg-menu">
+        <path stroke="red" stroke-width="6px" id="menu" d="M40 20L60 20Q80 20 80 40 L80 80Q80 100 60 100L40 100Q20 100 20 80L20 40Q20 20 40 20"></path>
+    </svg>-->
     <div id="svg-particles"></div>
+    <svg id="svg-menu">
+        <defs id="svg-gradients">
+            <linearGradient id="fill1">
+                <stop offset="0%" stop-color="#e4e4e3" ></stop>
+                <stop offset="80%" stop-color="#fff" ></stop>
+            </linearGradient>
+          </defs>
+        <defs>
+            <filter id="f3" x="0" y="0" width="200%" height="200%">
+              <feOffset result="offOut" in="SourceAlpha" dx="20" dy="20" />
+              <feGaussianBlur result="blurOut" in="offOut" stdDeviation="10" />
+              <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+            </filter>
+            </defs>
+            
+        <path style='fill:url("#fill1");''>
+            
+        </path>
+        <path></path>
+        <path id="boi"></path>
+    </svg>
 </body>
 </html>

@@ -11,3 +11,23 @@ body, html{
     border-radius: 28px;
     background-color: rgb(196, 113, 212);
 }
+
+#svg-menu{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    path{
+        fill:rgb(239, 201, 247);
+        &:nth-child(2){fill:rgb(201, 247, 213);}
+        &:nth-child(3){fill:rgb(247, 233, 154);}
+    }
+
+    .icon{
+        background: red;
+        width: 48px;
+        height: 48px;
+        transform: translate(-50%,-50%);
+    }
+}
