@@ -1,0 +1,15 @@
+[package]
+name = "clump-tool-rust"
+version = "0.1.0"
+authors = ["Makeavoy <Makeavoy@gmail.com>"]
+edition = "2018"
+wasm-opt= false
+[lib]
+path = "src/rust-src/main.rs"
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wasm-bindgen = "0.2.74"
+
