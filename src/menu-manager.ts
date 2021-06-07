@@ -6,6 +6,7 @@ let point: vec = new vec(0, 0);
 let selected: AnimatedElement | undefined;
 let capture: AnimatedElement | undefined;
 let hiddenElement: AnimatedElement | undefined;
+
 let gradients;
 let gradientRef: HTMLElement | undefined;
 let idCounter: number = 0;
@@ -13,10 +14,10 @@ let idCounter: number = 0;
 function makeGrad(stops: {
     offset: string,
     color: string
-} []) {
+} []): [string, HTMLElement] {
     let id = 'grad' + idCounter;
     let stamp = 'http://www.w3.org/2000/svg';
-    let grad = document.createElement('linearGradient');
+    let grad = document.createElementNS(stamp,'linearGradient');
     grad.id = id;
     grad.setAttribute('gradientTransform', '90');
     stops.forEach((s: {
@@ -31,7 +32,7 @@ function makeGrad(stops: {
     if (gradientRef)
         gradientRef.appendChild(grad);
     idCounter++;
-    return id;
+    return [id, grad];
 }
 
 function animate(): void {
@@ -61,7 +62,10 @@ function animate(): void {
                 hiddenElement.hide(false);
                 hiddenElement = undefined;
             }
-            capture=undefined;
+            if(selected.gradientValue)
+                selected.removeGradient();
+
+            capture = undefined;
         }
 
 
@@ -89,10 +93,13 @@ class AnimatedElement {
     active: boolean = true;
     delay: number = 0;
     hidden: boolean = false;
+    color:string="#aaa";
     gradient ? : HTMLElement;
-    gradientValue?:string;
-    constructor(element: SVGPathElement, position: vec) {
+    gradientValue ? : string;
+    constructor(element: SVGPathElement, position: vec,color?:string) {
         this.nativeElement = element;
+        this.color=color?color:"#468";
+        this.nativeElement.style.fill=this.color;
         this.pos = position;
         this.centerElement = document.createElement('div');
         this.centerElement.className = "icon";
@@ -122,7 +129,14 @@ class AnimatedElement {
     settle(): void {
         if (this.shadowPoints)
             this.shadowPoints = undefined;
-        //if (this.capture)
+    }
+    removeGradient():void{
+        if(this.gradient){
+            this.gradient.remove();
+            this.gradientValue=undefined;
+            this.gradient=undefined;
+            this.nativeElement.style.fill=this.color;
+        }
 
     }
     check(x: number, y: number): boolean {
@@ -169,17 +183,27 @@ class AnimatedElement {
         for (let i = (edge.length / 2) - 1; i >= 0; i--) {
             this.shadowPoints.push(edge[i]);
         }
-        if(this.gradient){
-            
+
+        let value = "0% "+this.color+" 100% "+target.color;
+        if (this.gradientValue != value) {
+            this.gradientValue = value;
+            let [id, ele] = makeGrad([{
+                offset: "0%",
+                color: this.color
+            }, {
+                offset: "100%",
+                color: target.color
+            }]);
+            if(this.gradient)
+                this.gradient.replaceWith(ele);
+            this.gradient = ele;
+            this.nativeElement.style.fill = "url('#" + id + "')"
         }
 
-        /*this.nativeElement.style.fill = "url(#" + makeGrad([{
-            offset: "0%",
-            color: "blue"
-        }, {
-            offset: "100%",
-            color: "red"
-        }]) + ")"*/
+
+
+
+        /**/
 
     }
     animate(): boolean {
@@ -245,8 +269,8 @@ export function init(): void {
     if (path) {
         //test=new AnimatedElement(path, new vec(0, 0))
         elements.push(new AnimatedElement(path[0], new vec(0, 0)))
-        elements.push(new AnimatedElement(path[1], new vec(60, 60)))
-        elements.push(new AnimatedElement(path[2], new vec(250, 260)))
+        elements.push(new AnimatedElement(path[1], new vec(60, 60),"#706"))
+        elements.push(new AnimatedElement(path[2], new vec(250, 260),"#f45"))
 
     }
     window.addEventListener('pointermove', ev => {
