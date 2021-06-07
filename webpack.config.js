@@ -3,9 +3,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {
     CleanWebpackPlugin
 } = require('clean-webpack-plugin');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
 module.exports = {
     entry: './src/index.ts',
+    mode: 'development',//'development', production
+    experiments:{
+        asyncWebAssembly: true,
+    },
     plugins: [
         new CleanWebpackPlugin({
             dry: false,
@@ -16,6 +21,9 @@ module.exports = {
             inject: 'body',
             template: './src/index.html',
             filename: 'index.html'
+        }),
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, ".")// (where the cargo.toml file is located)
         }),
     ],
     module: {
