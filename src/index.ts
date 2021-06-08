@@ -1,7 +1,8 @@
 "use strict";
 import "./style/main.scss";
 import * as MenuManager from "./menu-manager";
-{
+import * as GLManager from "./gl-manager";
+
     import(
         /* webpackExports: ["default","say_hello_from_rust"]*/
         '../pkg/'
@@ -28,7 +29,7 @@ import * as MenuManager from "./menu-manager";
 
         })*/
 });
-}
+
 
 
 class Bubble extends HTMLElement{
@@ -44,7 +45,13 @@ function init():void{
         bubbles.push(b as Bubble);
     });
     MenuManager.init();
+    
     initListeners();
+    let out=GLManager.init();
+    if(out.length>0){
+        console.error("❌Error::"+out);
+    }else
+    console.log("✅WebGL started without issue")
 }init();
 
 
