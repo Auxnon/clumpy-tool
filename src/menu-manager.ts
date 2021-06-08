@@ -1,5 +1,5 @@
 import vec from "./vec";
-import * as MenuManager from "./menu-manager";
+import * as GLManager from "./gl-manager";
 
 let elements: AnimatedElement[] = [];
 let point: vec = new vec(0, 0);
@@ -17,9 +17,9 @@ function makeGrad(stops: {
 } []): [string, HTMLElement] {
     let id = 'grad' + idCounter;
     let stamp = 'http://www.w3.org/2000/svg';
-    let grad = document.createElementNS(stamp,'linearGradient');
+    let grad = document.createElementNS(stamp,'linearGradient') as HTMLElement;
     grad.id = id;
-    grad.setAttribute('gradientTransform', '90');
+    //grad.setAttribute('gradientTransform', '90');
     stops.forEach((s: {
         offset: string,
         color: string
@@ -96,6 +96,7 @@ class AnimatedElement {
     color:string="#aaa";
     gradient ? : HTMLElement;
     gradientValue ? : string;
+    hook?:Function;
     constructor(element: SVGPathElement, position: vec,color?:string) {
         this.nativeElement = element;
         this.color=color?color:"#468";
@@ -200,10 +201,7 @@ class AnimatedElement {
             this.nativeElement.style.fill = "url('#" + id + "')"
         }
 
-
-
-
-        /**/
+        
 
     }
     animate(): boolean {
@@ -258,9 +256,17 @@ class AnimatedElement {
             this.nativeElement.setAttribute('d', square([this.points[0].x, this.points[0].y, this.points[1].x, this.points[1].y, this.points[2].x, this.points[2].y, this.points[3].x, this.points[3].y]));
         }
 
-
+        if(this.hook)
+            this.hook(this.pos);
         return this.active;
     }
+}
+
+function cx(x:number){
+    return ((x/window.innerWidth)-.5)*8.;
+}
+function cy(y:number){
+    return ((y/window.innerHeight)-.5)*8.;
 }
 
 export function init(): void {
@@ -272,6 +278,9 @@ export function init(): void {
         elements.push(new AnimatedElement(path[1], new vec(60, 60),"#706"))
         elements.push(new AnimatedElement(path[2], new vec(250, 260),"#f45"))
 
+        elements[0].hook=(p:vec)=>{GLManager.setPos(0,cx(p.x),-cy(p.y),4.)}
+        elements[1].hook=(p:vec)=>{GLManager.setPos(1,cx(p.x),-cy(p.y),4.)}
+        elements[2].hook=(p:vec)=>{GLManager.setPos(2,cx(p.x),-cy(p.y),4.)}
     }
     window.addEventListener('pointermove', ev => {
         if (selected) {
