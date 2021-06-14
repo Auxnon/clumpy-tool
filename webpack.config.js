@@ -37,6 +37,10 @@ module.exports = {
                 use: ['style-loader','css-loader', 'sass-loader'],
                 exclude: /node_modules/,
             },
+            {
+                test: /\.svg/,
+                type: 'asset/resource'
+            }
             /*{
                 test: /\.[vert|frag]/,
                 type: 'asset/resource'
