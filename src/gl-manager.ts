@@ -11,24 +11,24 @@ let apos: WebGLUniformLocation;
 let bpos: WebGLUniformLocation;
 let cpos: WebGLUniformLocation;
 
-export function setPos(id: number, x: number, y: number, z: number) {
+export function setPos(id: number, x: number, y: number, z: number,w:number) {
     if (gl) {
         switch (id) {
             case 1:
-                gl.uniform3f(bpos, x, y, z);break;
+                gl.uniform4f(bpos, x, y, z,w);break;
             case 2:
-                gl.uniform3f(cpos, x, y, z);break;
+                gl.uniform4f(cpos, x, y, z,w);break;
             default:
-                gl.uniform3f(apos, x, y, z);
+                gl.uniform4f(apos, x, y, z,w);
         }
     }
 }
+
 export function init(): string {
     console.log('hi');
 
     let fs = getSource("./assets/fragment.frag"); //document.querySelector("#shader-vs");
     let vs = getSource("./assets/vertex.vert");
-
 
     let canvas: HTMLCanvasElement | null = document.querySelector("canvas");
     if (!canvas)
@@ -43,7 +43,6 @@ export function init(): string {
     if (fs && vs) {
         vShader = compileShader(gl, vs, gl.VERTEX_SHADER);
         fShader = compileShader(gl, fs, gl.FRAGMENT_SHADER);
-
     } else
         return "Cannot locate shaders";
 
@@ -92,16 +91,16 @@ export function init(): string {
         apos = a;
         bpos = b;
         cpos = c;
-        gl.uniform3f(apos, 0, 1, 0);
-        gl.uniform3f(bpos, 0, 1, 0);
-        gl.uniform3f(cpos, 0, 1, 0);
+        gl.uniform4f(apos, 0, 1, 0,0);
+        gl.uniform4f(bpos, 0, 1, 0,0);
+        gl.uniform4f(cpos, 0, 1, 0,0);
     }
-
+ 
 
     timeUniform = time;
     resolutionUniform = res;
     posUniform = pos;
-    // Bind the position buffer.
+
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
     let size = 2; // 2 components per iteration
