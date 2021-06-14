@@ -2,6 +2,7 @@
 import "./style/main.scss";
 import * as MenuManager from "./menu-manager";
 import * as GLManager from "./gl-manager";
+import "./components/color-wheel/";
 
     import(
         /* webpackExports: ["default","say_hello_from_rust"]*/
@@ -40,10 +41,19 @@ class Bubble extends HTMLElement{
 let bubbles:Bubble[]=[];
 
 function init():void{
+    /*addEventListener('colorpick',ev=>{
+        console.log(ev)
+    });*/
+    /*addEventListener('click',ev=>{
+        let d=document.createElement('ui-color-wheel')
+        d.style.left=ev.clientX+'px';
+        d.style.top=ev.clientY+'px';
+        document.body.append(d)
+    })
     console.log('hi');
     document.querySelectorAll('.bubble').forEach(b=>{
         bubbles.push(b as Bubble);
-    });
+    });*/
     MenuManager.init();
     
     initListeners();
