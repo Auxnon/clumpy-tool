@@ -10,6 +10,14 @@ let hiddenElement: AnimatedElement | undefined;
 let gradients;
 let gradientRef: HTMLElement | undefined;
 let idCounter: number = 0;
+let staticsLayer:HTMLElement;
+
+
+const SHAPE_BANK={
+    square:[v(-40, -40), v(40, -40), v(40, 40), v(-40, 40)],
+    star:[v(0, -40), v(38, -12.4), v(23.5, 32.4), v(-23.5, 32.4),v(-38,-12.4)],
+    //triangle:
+}
 
 function makeGrad(stops: {
     offset: string,
@@ -85,9 +93,9 @@ class AnimatedElement {
     pos: vec; //the intended position of the element with the intent of animating into and then stopping as close as possible
     center: vec; //the literal actual center of the element, unlike position this is accurate to it's current center
     centerElement: HTMLElement;
-    points: vec[] = [v(10, 10), v(80, 10), v(80, 80), v(10, 80)];
+    points: vec[];
     shadowPoints ? : vec[]; //only used for mixing elements
-    shape: vec[] = [v(-40, -40), v(40, -40), v(40, 40), v(-40, 40)];
+    shape: vec[]=SHAPE_BANK.star;
     radius: number = 50;
     velocity: vec[] = [];
     active: boolean = true;
@@ -98,6 +106,8 @@ class AnimatedElement {
     gradientValue ? : string;
     hook?:Function;
     constructor(element: SVGPathElement, position: vec,color?:string) {
+        this.points=this.shape.map(a=>a.add(v(30,30))); //[v(10, 10), v(80, 10), v(80, 80), v(10, 80)];
+        //this.points=[v(-10, -10), v(70, -10), v(70, 70), v(-10, 70)];
         this.nativeElement = element;
         this.color=color?color:"#468";
         this.nativeElement.style.fill=this.color;
@@ -107,7 +117,7 @@ class AnimatedElement {
         this.center = position.clone();
         this.centerElement.style.top = position.x + "px";
         this.centerElement.style.left = position.y + "px";
-        this.nativeElement.appendChild(this.centerElement);
+        staticsLayer.appendChild(this.centerElement);
         this.shake();
     }
     get ishidden() {
@@ -125,7 +135,7 @@ class AnimatedElement {
     shake(): void {
         this.delay = 0;
         this.active = true;
-        this.velocity = [v(rnd(20), rnd(20)), v(rnd(20), rnd(20)), v(rnd(20), rnd(20)), v(rnd(20), rnd(20))];
+        this.velocity = this.points.map(a=> v(rnd(20), rnd(20)) );
     }
     settle(): void {
         if (this.shadowPoints)
@@ -166,24 +176,70 @@ class AnimatedElement {
     }
     mix(target: AnimatedElement): void {
         let home = this.points.map(a => a);
-        /*this.points.map(v => {
-                    return v.distance(target.center)
-                });*/
         let edge = target.points.map(a => a);
+        //let home:vec[]=[],edge:vec[]=[];
+        let closest=999999;
+        let homeS,homeE;
+        for(let i=0;i<this.points.length;i++){
+            let d=this.points[i].distance(target.pos);
+            if(d<closest){
+                closest=d;
+                if(homeS!=undefined){
+                    homeE=homeS;
+                }
+                homeS=i;
+            }
+        }
+        closest=999999;
+       
+        let edgeS,edgeE;
+        for(let i=0;i<target.points.length;i++){
+            let d=target.points[i].distance(this.pos);
+            if(d<closest){
+                closest=d;
+                if(edgeS!=undefined){
+                    edgeE=edgeS;
+                }
+                edgeS=i;
+            }
+        }
+   
+        /*
         home.sort((a, b) => {
             return a.distance(target.pos) - b.distance(target.pos);
         })
         edge.sort((a, b) => {
             return b.distance(this.pos) - a.distance(this.pos);
-        })
+        })*/
         this.shadowPoints = [];
-        for (let i = home.length / 2; i < home.length; i++) {
+        if(homeS==undefined || homeE==undefined || edgeE==undefined || edgeS==undefined)
+            return;
+        let n=0;
+        let k=homeS;
+        while(n<16 && k!=homeE){
+           
+            
+            this.shadowPoints.push(this.points[k]);
+            n++;
+            k++;
+            if(k>=this.points.length)k=0;
+        }
+        n=0;k=edgeS
+        while(n<16 && k!=edgeE){
+            
+            this.shadowPoints.push(target.points[k]);
+            n++;
+            k++;
+            if(k>=target.points.length)k=0;
+        }
+       /*
+        for (let i = Math.floor(home.length / 2); i < home.length; i++) {
             this.shadowPoints.push(home[i]);
         }
         //for (let i = 0; i <(edge.length / 2) ; i++) {
-        for (let i = (edge.length / 2) - 1; i >= 0; i--) {
+        for (let i = Math.floor(edge.length / 2) ; i >= 0; i--) {
             this.shadowPoints.push(edge[i]);
-        }
+        }*/
 
         let value = "0% "+this.color+" 100% "+target.color;
         if (this.gradientValue != value) {
@@ -245,19 +301,19 @@ class AnimatedElement {
         this.centerElement.style.top = this.center.y + 'px';
         if (this.shadowPoints) {
             if (this.shadowPoints.length > 0) {
-                let p = [];
+                /*let p = [];
                 for (let i = 0; i < this.shadowPoints.length; i++) {
                     p.push(this.shadowPoints[i].x, this.shadowPoints[i].y)
-                }
-                this.nativeElement.setAttribute('d', square(p));
+                }*/
+                this.nativeElement.setAttribute('d', render(this.shadowPoints));
             } else
                 this.nativeElement.setAttribute('d', '');
         } else {
-            this.nativeElement.setAttribute('d', square([this.points[0].x, this.points[0].y, this.points[1].x, this.points[1].y, this.points[2].x, this.points[2].y, this.points[3].x, this.points[3].y]));
+            this.nativeElement.setAttribute('d', render(this.points));
         }
 
         if(this.hook)
-            this.hook(this.pos);
+            this.hook(this,this.pos);
         return this.active;
     }
 }
@@ -270,6 +326,7 @@ function cy(y:number){
 }
 
 export function init(): void {
+    staticsLayer=document.querySelector('#statics-layer') as HTMLElement;
     let path = document.querySelectorAll('path');
     gradientRef = document.querySelector('#svg-gradients') as HTMLElement;
     if (path) {
@@ -278,9 +335,9 @@ export function init(): void {
         elements.push(new AnimatedElement(path[1], new vec(60, 60),"#706"))
         elements.push(new AnimatedElement(path[2], new vec(250, 260),"#f45"))
 
-        elements[0].hook=(p:vec)=>{GLManager.setPos(0,cx(p.x),-cy(p.y),4.)}
-        elements[1].hook=(p:vec)=>{GLManager.setPos(1,cx(p.x),-cy(p.y),4.)}
-        elements[2].hook=(p:vec)=>{GLManager.setPos(2,cx(p.x),-cy(p.y),4.)}
+        elements[0].hook=(self:AnimatedElement,p:vec)=>{GLManager.setPos(0,cx(p.x),-cy(p.y),4.,(self.ishidden||self.gradient)?1.:0.)}
+        elements[1].hook=(self:AnimatedElement,p:vec)=>{GLManager.setPos(1,cx(p.x),-cy(p.y),4.,(self.ishidden||self.gradient)?1.:0.)}
+        elements[2].hook=(self:AnimatedElement,p:vec)=>{GLManager.setPos(2,cx(p.x),-cy(p.y),4.,(self.ishidden||self.gradient)?1.:0.)}
     }
     window.addEventListener('pointermove', ev => {
         if (selected) {
@@ -317,28 +374,44 @@ function rnd(v: number): number {
     return (Math.random() * 2 - 1) * (v ? v : 1);
 }
 
-function square(p: number[]) {
-    let offset = 10;
-    let slope = [(p[2] - p[0]), (p[3] - p[1]), (p[4] - p[2]), (p[5] - p[3]), (p[6] - p[4]), (p[7] - p[5]), (p[0] - p[6]), (p[1] - p[7])];
-
-    for (let i = 0; i < 8; i += 2) {
-        let r = Math.sqrt(slope[i] * slope[i] + slope[i + 1] * slope[i + 1]);
-        slope[i] /= r;
-        slope[i + 1] /= r;
+function render(p: vec[]) {
+   // p=[v(40,120),v(120,120),v(120,200),v(40,200)];
+    const offset = 10;
+    let slope: vec[]=[];
+    for(let i=0;i<p.length;i++){
+        if(!p[i])
+            return "";
+        let n=i+1;
+        if(n>=p.length) n=0;
+        slope[i]=new vec(p[n].x-p[i].x,p[n].y-p[i].y);
+        let r =slope[i].length();
+        slope[i].x /= r;
+        slope[i].y /= r;
     }
+    //let slope = [(p[2] - p[0]), (p[3] - p[1]), (p[4] - p[2]), (p[5] - p[3]), (p[6] - p[4]), (p[7] - p[5]), (p[0] - p[6]), (p[1] - p[7])];
+
+    /*for (let i = 0; i < p.length; i ++) {
+        let r =slope[i].length();
+        slope[i].x /= r;
+        slope[i].y /= r;
+    }*/
     //m <- (n*sum(xy)-sum(x)*sum(y)) / (n*sum(x^2)-sum(x)^2) 
 
     const f = Math.floor;
 
     let c1, c2; //round corners
-    c2 = [f(p[0] + offset * slope[0]), f(p[1] + offset * slope[1])]; //
+    c2 = [f(p[0].x + offset * slope[0].x), f(p[0].y + offset * slope[0].y)]; //
 
     let st = "M" + c2[0] + " " + c2[1];
-    c1 = [f(p[2] - offset * slope[0]), f(p[3] - offset * slope[1])];
-    c2 = [f(p[2] + offset * slope[2]), f(p[3] + offset * slope[3])];
-    st += "L" + c1[0] + " " + c1[1];
-    st += "Q " + f(p[2]) + " " + f(p[3]) + " " + c2[0] + " " + c2[1];
-
+    for(let i=0;i<p.length;i++){
+        let n=i+1;
+        if(n>=p.length) n=0;
+        c1 = [f(p[n].x - offset * slope[i].x), f(p[n].y - offset * slope[i].y)];
+        c2 = [f(p[n].x + offset * slope[n].x), f(p[n].y + offset * slope[n].y)];
+        st += "L" + c1[0] + " " + c1[1];
+        st += "Q " + f(p[n].x) + " " + f(p[n].y) + " " + c2[0] + " " + c2[1];
+    }
+/*
     c1 = [f(p[4] - offset * slope[2]), f(p[5] - offset * slope[3])];
     c2 = [f(p[4] + offset * slope[4]), f(p[5] + offset * slope[5])];
     st += "L" + c1[0] + " " + c1[1];
@@ -352,8 +425,8 @@ function square(p: number[]) {
     c1 = [f(p[0] - offset * slope[6]), f(p[1] - offset * slope[7])];
     c2 = [f(p[0] + offset * slope[0]), f(p[1] + offset * slope[1])];
     st += "L" + c1[0] + " " + c1[1];
-    st += "Q " + f(p[0]) + " " + f(p[1]) + " " + c2[0] + " " + c2[1];
-    st += "Z";
+    st += "Q " + f(p[0]) + " " + f(p[1]) + " " + c2[0] + " " + c2[1];*/
+    //st += "Z";
     return st;
 
 }
