@@ -1,0 +1,40 @@
+{
+  "name": "clumpy-tool",
+  "version": "0.0.1",
+  "description": "A 3D tool of sorts",
+  "main": "App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Auxnon/clumpy-tool.git"
+  },
+  "keywords": [
+    "3d",
+    "webgl",
+    "typescript",
+    "wasm",
+    "raycat"
+  ],
+  "author": "MakeAvoy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Auxnon/clumpy-tool/issues"
+  },
+  "homepage": "https://github.com/Auxnon/clumpy-tool#readme",
+  "devDependencies": {
+    "@wasm-tool/wasm-pack-plugin": "^1.4.0",
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "css-loader": "^5.2.6",
+    "html-webpack-plugin": "^5.3.1",
+    "sass": "^1.34.1",
+    "sass-loader": "^12.0.0",
+    "style-loader": "^2.0.0",
+    "ts-loader": "^9.2.2",
+    "typescript": "^4.3.2",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}

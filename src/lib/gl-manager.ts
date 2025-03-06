@@ -1,3 +1,5 @@
+import "svelte";
+
 let gl: WebGL2RenderingContext;
 let program: WebGLProgram;
 let time = 0;
@@ -11,28 +13,27 @@ let apos: WebGLUniformLocation;
 let bpos: WebGLUniformLocation;
 let cpos: WebGLUniformLocation;
 
-export function setPos(id: number, x: number, y: number, z: number,w:number) {
+export function setPos(id: number, x: number, y: number, z: number, w: number) {
     if (gl) {
         switch (id) {
             case 1:
-                gl.uniform4f(bpos, x, y, z,w);break;
+                gl.uniform4f(bpos, x, y, z, w); break;
             case 2:
-                gl.uniform4f(cpos, x, y, z,w);break;
+                gl.uniform4f(cpos, x, y, z, w); break;
             default:
-                gl.uniform4f(apos, x, y, z,w);
+                gl.uniform4f(apos, x, y, z, w);
         }
     }
 }
 
-export function init(): string {
-    console.log('hi');
+export function init(canvas: HTMLCanvasElement): string {
+
+    if (!canvas)
+        return "Canvas missing";
 
     let fs = getSource("./assets/fragment.frag"); //document.querySelector("#shader-vs");
     let vs = getSource("./assets/vertex.vert");
 
-    let canvas: HTMLCanvasElement | null = document.querySelector("canvas");
-    if (!canvas)
-        return "Canvas missing";
 
     let out = canvas.getContext("webgl2");
     if (!out)
@@ -91,11 +92,11 @@ export function init(): string {
         apos = a;
         bpos = b;
         cpos = c;
-        gl.uniform4f(apos, 0, 1, 0,0);
-        gl.uniform4f(bpos, 0, 1, 0,0);
-        gl.uniform4f(cpos, 0, 1, 0,0);
+        gl.uniform4f(apos, 0, 1, 0, 0);
+        gl.uniform4f(bpos, 0, 1, 0, 0);
+        gl.uniform4f(cpos, 0, 1, 0, 0);
     }
- 
+
 
     timeUniform = time;
     resolutionUniform = res;
